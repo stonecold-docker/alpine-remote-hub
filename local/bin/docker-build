@@ -1,0 +1,34 @@
+#!/bin/sh
+
+set -e
+
+echo "[$(TZ="GMT-9" date '+%Y-%m-%d %H:%M:%S')] ==> Installing required packages"
+PKG_LIB="nodejs"
+PKG_DEV="npm"
+docker-install -r -u ${PKG_LIB} ${PKG_DEV}
+echo "[$(TZ="GMT-9" date '+%Y-%m-%d %H:%M:%S')] ==> OK"
+echo
+
+echo "[$(TZ="GMT-9" date '+%Y-%m-%d %H:%M:%S')] ==> Installing remote-hub"
+mkdir -p /app
+cd /app
+wget --no-check-certificate -q -O - https://github.com/forumi0721/remote-hub/archive/refs/heads/master.tar.gz | tar zx
+mv remote-hub-* remote-hub
+cd remote-hub
+rm -rf .gitignore *.md Dockerfile config docker-compose.yml node_modules test
+npm ci --only=production
+mkdir -p /conf.d/remote-hub
+cd /
+echo "[$(TZ="GMT-9" date '+%Y-%m-%d %H:%M:%S')] ==> OK"
+echo
+
+echo "[$(TZ="GMT-9" date '+%Y-%m-%d %H:%M:%S')] ==> Uninstalling unnecessary packages"
+docker-install -d -c ${PKG_DEV}
+echo "[$(TZ="GMT-9" date '+%Y-%m-%d %H:%M:%S')] ==> OK"
+echo
+
+echo "[$(TZ="GMT-9" date '+%Y-%m-%d %H:%M:%S')] ==> Setting basic configurations"
+mkdir -p /conf.d /conf.d/remote-hub
+echo "[$(TZ="GMT-9" date '+%Y-%m-%d %H:%M:%S')] ==> OK"
+echo
+
